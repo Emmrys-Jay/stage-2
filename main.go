@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Response struct {
@@ -15,10 +16,11 @@ type Response struct {
 }
 
 func main() {
+	port := os.Getenv("PORT")
 	mux := http.NewServeMux()
-	mux.HandleFunc("/bio", response)
+	mux.HandleFunc("/", response)
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
 func response(w http.ResponseWriter, r *http.Request) {
