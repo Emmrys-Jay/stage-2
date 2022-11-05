@@ -14,7 +14,13 @@ func ParseRequest(op string, x int, y int) (operation string, result int) {
 	case Operations[2]:
 		operation = Operations[2]
 		result = x * y
+	default:
+		operation = "You passed in an invalid operation"
 	}
 
 	return
+}
+
+func ParseRandomString() {
+
 }
