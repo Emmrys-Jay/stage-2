@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Emmrys-Jay/stage-2/parser"
 	"github.com/gorilla/mux"
@@ -23,13 +24,13 @@ type ResponseBody struct {
 }
 
 func main() {
-	// port := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 	router := mux.NewRouter()
 
 	router = router.Methods(http.MethodPost).Subrouter()
 	router.HandleFunc("/", computeResult)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func computeResult(w http.ResponseWriter, r *http.Request) {
