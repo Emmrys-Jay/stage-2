@@ -5,39 +5,58 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+
+	"github.com/Emmrys-Jay/stage-2/parser"
+	"github.com/gorilla/mux"
 )
 
-type Response struct {
-	Username string `json:"slackUsername"`
-	Backend  bool   `json:"backend"`
-	Age      int    `json:"age"`
-	Bio      string `json:"bio"`
+type RequestBody struct {
+	OperationType string `json:"operation_type"`
+	X             int    `json:"x"`
+	Y             int    `json:"y"`
+}
+
+type ResponseBody struct {
+	Username      string `json:"slackUsername"`
+	OperationType string `json:"operation_type"`
+	Result        int    `json:"result"`
 }
 
 func main() {
-	port := os.Getenv("PORT")
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", response)
+	// port := os.Getenv("PORT")
+	router := mux.NewRouter()
 
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	router = router.Methods(http.MethodPost).Subrouter()
+	router.HandleFunc("/", computeResult)
+
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func response(w http.ResponseWriter, r *http.Request) {
-	response := Response{
-		"Emmrys",
-		true,
-		20,
-		"Student who loves learning and is currently exploring backend engineering",
-	}
+func computeResult(w http.ResponseWriter, r *http.Request) {
+	var reqBody RequestBody
 
-	result, err := json.Marshal(response)
-	if err != nil {
-		fmt.Fprintln(w, "Error: couldn't marshal json")
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		fmt.Fprintf(w, "error:  %v\n", err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	fmt.Fprintln(w, string(result))
+	operation, result := parser.ParseRequest(reqBody.OperationType, reqBody.X, reqBody.Y)
+
+	response := ResponseBody{
+		Username:      "Emmrys",
+		Result:        result,
+		OperationType: operation,
+	}
+
+	respJson, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		fmt.Fprintf(w, "error:  %v\n", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(respJson)
 }

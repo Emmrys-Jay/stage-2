@@ -1,3 +1,5 @@
-module github.com/Emmrys-Jay/stage-1
+module github.com/Emmrys-Jay/stage-2
 
 go 1.19
+
+require github.com/gorilla/mux v1.8.0 // indirect
